@@ -32,15 +32,15 @@ $ ln -s ../build/corBackground
 ### Preparation
 You should prepare Suzaku mkf files (FITS), source time file (ASCII), and mkf list file (ASCII).
 
-1. Suzaku mkf files (FITS)
-   Download mkf files (ae*.mkf.gz) from Suzaku public data archive [http://www.darts.isas.jaxa.jp/astro/suzaku/public_seq.html].
+    1. Suzaku mkf files (FITS)  
+    Download mkf files (ae*.mkf.gz) from Suzaku public data archive [http://www.darts.isas.jaxa.jp/astro/suzaku/public_seq.html].
 
-2. mkf list file (ASCII: mkfList.txt)
-   $ ls -1 /path/to/mkfs/ae*mkf.gz > mkfList.txt
+    2. mkf list file (ASCII: mkfList.txt)  
+    $ ls -1 /path/to/mkfs/ae*mkf.gz > mkfList.txt
 
-3. source time file (ASCII: srcAsteTime.txt)
-   $ echo 285835516.9 > srcAsteTime.txt
-   You can know aste time on the useful tool, xtime [https://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xTime/xTime.pl].
+    3. source time file (ASCII: srcAsteTime.txt)  
+    $ echo 285835516.9 > srcAsteTime.txt  
+    You can know aste time on the useful tool, xtime [https://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xTime/xTime.pl].
 
 
 ### Run  
