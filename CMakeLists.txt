@@ -14,6 +14,7 @@ add_executable(${app}
   src/readFitsCor.cc
   src/readFitsTime.cc
   src/readFits.cc
+  src/calcCorrelation.cc
 )
 
 target_link_libraries(${app} ${SFITS_LIB}
