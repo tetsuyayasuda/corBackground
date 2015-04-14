@@ -31,7 +31,7 @@ $ ln -s ../build/corBackground
 
 
 ### Preparation
-You should prepare Suzaku mkf files (FITS), source time file (ASCII), and mkf list file (ASCII).
+You should prepare Suzaku mkf files (FITS), source time, and mkf list file (ASCII).
 
     1. Suzaku mkf files (FITS)  
     Download mkf files (ae*.mkf.gz) from Suzaku public data archive
@@ -40,17 +40,20 @@ You should prepare Suzaku mkf files (FITS), source time file (ASCII), and mkf li
     2. mkf list file (ASCII: mkfList.txt)  
     $ find /path/to/mkfs/ae*mkf.gz > mkfList.txt
 
-    3. source time file (ASCII: srcAsteTime.txt)  
-    $ echo 285835516.9 > srcAsteTime.txt  
-    You can know aste time using the useful tool, xtime 
+    3. source time
+    You can know aste time as the source time using the useful tool, xtime 
     [https://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xTime/xTime.pl].
 
 
-### Run  
+### Run
+    (Usage)
+    ./corBackground [asteTime] [mkfList] [option:day]
+    
+    (Example)
     $ ls
-    corBackground   mkfList.txt     srcAsteTime.txt
-    $ ./corBackground
-
+    corBackground   mkfList.txt
+    $ ./corBackground 285835516.9 mkfList.txt 51
+    
 
 ### Outputs
 Please check outputs, whether calculation was appropriate or not.

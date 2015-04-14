@@ -45,9 +45,9 @@
 
 using namespace sli;
 
-int main(){
+int main(int argc, char *argv[]){
 
-  
+
   /**************/
   /*   Step 1   */
   /**************/
@@ -57,7 +57,7 @@ int main(){
   double bg1AsteTime, bg2AsteTime;
   double bg1AsteStart, bg2AsteStart;
   int mkfNum = 0;
-  std::ifstream fSrcAsteTime, fMkfList;
+  //std::ifstream fSrcAsteTime, fMkfList;
   std::vector<std::string> mkfName;
   std::string name;
   int srcMkfId = -1;
@@ -69,60 +69,44 @@ int main(){
   int bg1Offset, init_bg1Offset;
   int bg2Offset, init_bg2Offset;
   int init_srcOffset;
+  double day1 = 86400.0; // a day = 86400 s 
+  double days = 51.0;    // 51 days (default)
 
   ///// region of cross correlation 
   int crossOffset = 25000;
-  //int crossOffset = 8000; // default
 
   ///// region to seach good time lag
   int searchOffset = 1000;
   int searchResion = 200; // +-200
 
 
-  // file open ------------------------------
-  fSrcAsteTime.open("srcAsteTime.txt");
-  if( ! fSrcAsteTime.good() ){
-    std::cout << "--------------  ERROR  ---------------" << std::endl;
-    std::cout << "   Could not open: srcAsteTime.txt !!!" << std::endl;
+  // parameter number check
+  if( argc != 3 && argc != 4 ){
+    std::cout << "ERROR: Invalid Parameter(s)." << std::endl;
+    std::cout << "Usage:" << std::endl;
+    std::cout << "\t./corBackground [asteTime] [mkfList] [option:day]" << std::endl;
     exit(1);
   }
-  fMkfList.open("mkfList.txt");
-  if( ! fMkfList.good() ){
-    std::cout << "--------------  ERROR  ---------------" << std::endl;
-    std::cout << "   Could not open: mkfList.txt !!!" << std::endl;
-    exit(1);
+  srcAsteTime = atof( argv[1] );
+  std::string fMkfList = (std::string)argv[2];
+  if( argc == 4 ){
+    days = atof( argv[3] );
   }
-  std::cout << "------------ src asteTime ------------" << std::endl;
-  while( ! fSrcAsteTime.eof() ){
-    fSrcAsteTime >> srcAsteTime;
+
+  // read mkf list
+  std::ifstream filein( fMkfList.c_str() );
+  for (std::string line; std::getline(filein, line); ){
+    if( fopen( line.c_str(), "r" ) == NULL ){
+      std::cout << "No such a file: " << line << ", skipped." << std::endl;
+      continue;
+    }
+    mkfName.push_back( line );
   }
-  std::cout << srcAsteTime << std::endl;
-  std::cout << "-------------  mkf list  -------------" << std::endl;
-  while( ! fMkfList.eof() ){
-    fMkfList >> name;
-    mkfName.push_back( name );
-    std::cout << name << std::endl;
-    mkfNum ++;
-  }
-  mkfNum = mkfNum - 1;
-  std::cout << "------------  mkf number  ------------" << std::endl;
-  std::cout << mkfNum << std::endl;
+  mkfNum = mkfName.size();
 
-
-  // calculation of pre/post 51 days -------------------------------
-  //bg1AsteTime = srcAsteTime - 4406400.0; // previous 51 days 
-  //bg2AsteTime = srcAsteTime + 4406400.0; // post 51 days
-  //--------------------------------------- 4406400.0 [sec] = 51 days
-  // calculation of pre/post 1 day ---------------------------------
-  bg1AsteTime = srcAsteTime - 86400.0; // previous 1 day 
-  bg2AsteTime = srcAsteTime + 86400.0; // post 1 day
-  //--------------------------------------- 86400.0 [sec] = 51 days
-  std::cout << "------------  init bgd time  ------------" << std::endl;
-  std::cout << "bg1AsteTime: " << bg1AsteTime << std::endl;
-  std::cout << "bg2AsteTime: " << bg2AsteTime << std::endl;
-
-
-
+  bg1AsteTime = srcAsteTime - (days * day1); // previous ? days
+  bg2AsteTime = srcAsteTime + (days * day1); // post ? days
+  
 
   /*******************/
   /*   Step 2        */
