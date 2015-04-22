@@ -45,6 +45,16 @@
 
 using namespace sli;
 
+void inputCheck(int argc){
+  // parameter number check
+  if( argc != 3 && argc != 4 ){
+    std::cout << "ERROR: Invalid Parameter(s)." << std::endl;
+    std::cout << "Usage:" << std::endl;
+    std::cout << "\t./corBackground [asteTime] [mkfList] [option:day]" << std::endl;
+    exit(1);
+  }
+}
+
 int main(int argc, char *argv[]){
 
 
@@ -80,13 +90,8 @@ int main(int argc, char *argv[]){
   int searchResion = 200; // +-200
 
 
-  // parameter number check
-  if( argc != 3 && argc != 4 ){
-    std::cout << "ERROR: Invalid Parameter(s)." << std::endl;
-    std::cout << "Usage:" << std::endl;
-    std::cout << "\t./corBackground [asteTime] [mkfList] [option:day]" << std::endl;
-    exit(1);
-  }
+  // parameters setting
+  inputCheck( argc );
   srcAsteTime = atof( argv[1] );
   std::string fMkfList = (std::string)argv[2];
   if( argc == 4 ){
