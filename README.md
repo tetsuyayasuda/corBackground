@@ -31,7 +31,7 @@ $ ln -s ../build/corBackground
 
 
 ### Preparation
-You should prepare Suzaku mkf files (FITS), source time, and mkf list file (ASCII).
+You should prepare Suzaku mkf files (FITS), those list file (ASCII), and source time as Suzaku time (aste time).
 
     1. Suzaku mkf files (FITS)  
     Download mkf files (ae*.mkf.gz) from Suzaku public data archive
@@ -57,9 +57,8 @@ You should prepare Suzaku mkf files (FITS), source time, and mkf list file (ASCI
 
 ### Outputs
 Please check outputs, whether calculation was appropriate or not.
-- crossCurveFirst.qdp:  result of cross correlation.
-- crossCurveSecond.qdp: result of cross correlation.
-- crossCorrelation.qdp: residual between COR curves.
+- crossCurveFirst.qdp:  corrected COR curves.
+- crossCurveSecond.qdp: corrected COR curves.
 - results.txt
 
 

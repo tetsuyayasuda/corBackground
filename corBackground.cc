@@ -26,16 +26,19 @@
 // 
 // T.Yasuda   2012-11-02 ver0.0
 // (This code was originated by A.Endo on Perl script.)
+// T.Yasuda   2015-04-23 ver0.1
 //
 //**************************************************************************
 
 
 #include <stdio.h>
+#include <string.h>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <string.h>
+#include <tuple>
+
 
 #include <sli/stdstreamio.h>
 #include <sli/tstring.h>
@@ -44,6 +47,7 @@
 #include "readFits.hh"
 
 using namespace sli;
+
 
 void inputCheck(int argc){
   // parameter number check
@@ -54,6 +58,50 @@ void inputCheck(int argc){
     exit(1);
   }
 }
+
+
+std::tuple<int, double> searchGoodLag_first(int bgdOffset, int initSrcOffset, std::vector<double> srcArray, int initBgdOffset, std::vector<double> bgdArray){
+  
+  int goodLag = 0;
+  double sumCrossCorre = 1.0e256;
+  for(int j=-bgdOffset; j<bgdOffset; j++){
+    double pre_crossCorre = 0.0;
+    if(j%1000==0) std::cout << "( " << j << " / " << bgdOffset << " )" << std::endl;
+    
+    for(int i=-bgdOffset; i<bgdOffset; i++){
+      pre_crossCorre += fabs( bgdArray[ initBgdOffset+j+i ] - srcArray[ initSrcOffset+i ] );
+    }
+    if( pre_crossCorre < sumCrossCorre ){
+      sumCrossCorre = pre_crossCorre;
+      goodLag = j;
+    }
+  }
+  return std::make_tuple(goodLag, sumCrossCorre);
+}
+
+
+std::tuple<int, double> searchGoodLag_second(int bgdOffset, int searchOffset, int searchResion, int initSrcOffset, std::vector<double> srcArray, int initBgdOffset, std::vector<double> bgdArray){
+  
+  int goodLag = 0;
+  double sumCrossCorre = 1.0e256;
+
+  for(int j=bgdOffset-searchOffset; j<bgdOffset+searchOffset; j++){
+    double pre_crossCorre = 0.0;
+    if( (j-bgdOffset)%50==0) std::cout << "( " << j << " / " << j-bgdOffset << " )" << std::endl;
+    
+    for(int i=-searchResion; i<searchResion; i++){
+      pre_crossCorre += fabs( bgdArray[ initBgdOffset+j+i ] - srcArray[ initSrcOffset+i ] );
+    }
+    if( pre_crossCorre < sumCrossCorre ){
+      sumCrossCorre = pre_crossCorre;
+      goodLag = j + initBgdOffset;
+    }
+  }
+  return std::make_tuple(goodLag, sumCrossCorre);
+}
+
+
+
 
 int main(int argc, char *argv[]){
 
@@ -207,85 +255,34 @@ int main(int argc, char *argv[]){
   /*   Step 3             */
   /* search good time lag */
   /************************/
-
+  
   double bg1SumCrossCorre = 1.0e256;
   double bg2SumCrossCorre = 1.0e256;
-  double pre_bg1SumCrossCorre = 0.0;
-  double pre_bg2SumCrossCorre = 0.0;
-  std::ofstream crossCorrelation("crossCorrelation.qdp");
+  //std::ofstream crossCorrelation( "crossCorrelation.qdp" );
  
   // start cross correlation  ------------------------------------
   int firstLag1, firstLag2;
   std::cout << "init_bg1Offset : " << init_bg1Offset << std::endl;
   std::cout << "init_bg2Offset : " << init_bg2Offset << std::endl;
+  std::tuple<int, double> resultCrossCor;
 
-  /// first search ---------------------
-  for(int j=-crossOffset; j<crossOffset; j++){
-    pre_bg1SumCrossCorre = 0.0;
-    pre_bg2SumCrossCorre = 0.0;
-    if(j%500==0) std::cout << "( " << j << " / " << crossOffset << " )" << std::endl;
-   
-    // back ground 1 ---------------------------------------------
-    for(int i=-crossOffset; i<crossOffset; i++){
-      pre_bg1SumCrossCorre = pre_bg1SumCrossCorre + fabs( bg1Cor[ init_bg1Offset+j+i ] - srcCor[ init_srcOffset+i ] );
-    }
-    if( pre_bg1SumCrossCorre < bg1SumCrossCorre ){
-      bg1SumCrossCorre = pre_bg1SumCrossCorre;
-      firstLag1 = j;
-    }
+  // searches in wide regions
+  resultCrossCor = searchGoodLag_first(crossOffset, init_srcOffset, srcCor, init_bg1Offset, bg1Cor);
+  firstLag1 = std::get<0>(resultCrossCor);
+  bg1SumCrossCorre = std::get<1>(resultCrossCor);
+  
+  resultCrossCor = searchGoodLag_first(crossOffset, init_srcOffset, srcCor, init_bg2Offset, bg2Cor);
+  firstLag2 = std::get<0>(resultCrossCor);
+  bg2SumCrossCorre = std::get<1>(resultCrossCor);
 
+  // searches in narrow regions
+  resultCrossCor = searchGoodLag_second(firstLag1, searchOffset, searchResion, init_srcOffset, srcCor, init_bg1Offset, bg1Cor);
+  bg1Offset = std::get<0>(resultCrossCor);
+  bg1SumCrossCorre = std::get<1>(resultCrossCor);
 
-    // back ground 2 ---------------------------------------------
-    for(int i=-crossOffset; i<crossOffset; i++){
-      pre_bg2SumCrossCorre = pre_bg2SumCrossCorre + fabs( bg2Cor[ init_bg2Offset+j+i ] - srcCor[ init_srcOffset+i ] );
-    }
-
-    if( pre_bg2SumCrossCorre < bg2SumCrossCorre ){
-      bg2SumCrossCorre = pre_bg2SumCrossCorre;
-      firstLag2 = j;
-    }
-    
-    crossCorrelation << j <<" "<< pre_bg1SumCrossCorre <<" "<< pre_bg2SumCrossCorre << std::endl;    
-  }
-  std::cout << "- first search is done " << std::endl << std::endl;
-  crossCorrelation.close();
-
-
-
-
-  /// second search -------------------
-  bg1SumCrossCorre = 1.0e256;
-  bg2SumCrossCorre = 1.0e256;
-  for(int j=firstLag1-searchOffset; j<firstLag1+searchOffset; j++){
-    pre_bg1SumCrossCorre = 0.0;
-    if( (j-firstLag1)%50==0) std::cout << "( " << j << " / " << j-firstLag1 << " )" << std::endl;
-   
-    // back ground 1 ---------------------------------------------
-    for(int i=-searchResion; i<searchResion; i++){
-      pre_bg1SumCrossCorre = pre_bg1SumCrossCorre + fabs( bg1Cor[ init_bg1Offset+j+i ] - srcCor[ init_srcOffset+i ] );
-    }
-    if( pre_bg1SumCrossCorre < bg1SumCrossCorre ){
-      bg1SumCrossCorre = pre_bg1SumCrossCorre;
-      bg1Offset = j + init_bg1Offset;
-    }
-  }
-
-  for(int j=firstLag2-searchOffset; j<firstLag2+searchOffset; j++){
-    pre_bg2SumCrossCorre = 0.0;
-    if( (j-firstLag2)%50==0) std::cout << "( " << j << " / " << j-firstLag2 << " )" << std::endl;
-    // back ground 2 ---------------------------------------------
-    for(int i=-searchResion; i<searchResion; i++){
-      pre_bg2SumCrossCorre = pre_bg2SumCrossCorre + fabs( bg2Cor[ init_bg2Offset+j+i ] - srcCor[ init_srcOffset+i ] );
-    }
-
-    if( pre_bg2SumCrossCorre < bg2SumCrossCorre ){
-      bg2SumCrossCorre = pre_bg2SumCrossCorre;
-      bg2Offset = j + init_bg2Offset;
-    }
-    
-  }
-  std::cout << "- second search is done " << std::endl;
-
+  resultCrossCor = searchGoodLag_second(firstLag2, searchOffset, searchResion, init_srcOffset, srcCor, init_bg2Offset, bg2Cor);
+  bg2Offset = std::get<0>(resultCrossCor);
+  bg2SumCrossCorre = std::get<1>(resultCrossCor);
 
   std::cout << "bg1Offset : " << bg1Offset << std::endl;
   std::cout << "bg1SumCrossCorre : " << bg1SumCrossCorre << std::endl;
@@ -299,6 +296,7 @@ int main(int argc, char *argv[]){
 
   /**************/
   /*   Step 4   */
+  /*  outputs   */
   /**************/
 
   double firstLag1Offset = firstLag1 + init_bg1Offset;
