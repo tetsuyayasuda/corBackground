@@ -111,9 +111,7 @@ int main(int argc, char *argv[]){
   /**************/
  
   // parameters -----------------------------
-  double srcAsteTime;
-  double bg1AsteTime, bg2AsteTime;
-  double bg1AsteStart, bg2AsteStart;
+  double srcAsteTime, bg1AsteTime, bg2AsteTime, bg1AsteStart, bg2AsteStart;
   int mkfNum = 0;
   //std::ifstream fSrcAsteTime, fMkfList;
   std::vector<std::string> mkfName;
@@ -124,9 +122,7 @@ int main(int argc, char *argv[]){
   int srcRowNum, bg1RowNum, bg2RowNum;
   int timeFlag = 0;
   std::vector<double> srcCor, bg1Cor, bg2Cor;
-  int bg1Offset, init_bg1Offset;
-  int bg2Offset, init_bg2Offset;
-  int init_srcOffset;
+  int bg1Offset, init_bg1Offset, bg2Offset, init_bg2Offset, init_srcOffset;
   double day1 = 86400.0; // a day = 86400 s 
   double days = 51.0;    // 51 days (default)
 
