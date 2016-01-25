@@ -40,7 +40,7 @@ You should prepare Suzaku mkf files (FITS), those list file (ASCII), and source 
     2. mkf list file (ASCII: mkfList.txt)  
     $ find /path/to/mkfs/ae*mkf.gz > mkfList.txt
 
-    3. source time
+    3. source time (observed date)
     You can know aste time as the source time using the useful tool, xtime 
     [https://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xTime/xTime.pl].
 
